@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Testy laboratoryjne</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<main class="container">
+  <div id="admin-menu" style="display: inline-block; margin-left: 10px;"></div>
+  <button id="logout">Wyloguj</button>
+
+  <h1>Testy laboratoryjne</h1>
+
+  <!-- Formularz -->
+  <form id="test-form" class="form">
+
+    <select id="typTestu" required>
+      <option value="">-- Rodzaj testu --</option>
+      <option value="100">100</option>
+      <option value="104">104</option>
+      <option value="111">111</option>
+      <option value="Ścieranie">Ścieranie</option>
+      <option value="UV test">UV test</option>
+    </select>
+
+    <input type="text" id="zlecajacy" placeholder="Osoba zlecająca" required />
+    <input type="text" id="nrProjektu" placeholder="Nr projektu" required />
+    <input type="text" id="nazwaProjektu" placeholder="Nazwa projektu" required />
+
+    <textarea id="opis" placeholder="Opis testu"></textarea>
+
+    <button type="submit">Dodaj test</button>
+  </form>
+
+  <!-- Lista -->
+  <section class="list">
+    <h2>Lista testów</h2>
+  
+    <table class="tests-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Nr testu</th>
+          <th>Rodzaj testu</th>
+          <th>Projekt</th>
+          <th>Nr projektu</th>
+          <th>Zlecający</th>
+          <th>Opis</th> </tr>
+        </tr>
+      </thead>
+      <tbody id="tests"></tbody>
+    </table>
+  
+    <button id="delete" class="danger">
+      Usuń zaznaczone
+    </button>
+    <input type="file" id="excelFile" accept=".xlsx,.xls" />
+    <button id="importExcel">Importuj plik Excel</button>
+    
+  </section>
+</main>
+
+<script src="app.js"></script>
+<script>
+async function checkAdmin() {
+  try {
+    const response = await fetch('/api/user-info');
+    const user = await response.json();
+
+    if (user.role === 'admin') {
+      const container = document.getElementById('admin-menu');
+      container.innerHTML = `
+        <a href="/admin-panel" class="btn btn-primary"
+        "> Panel Admina</a>
+      `;
+    }
+  } catch (err) {
+    console.error('Błąd pobierania roli:', err);
+  }
+}
+
+// Uruchom sprawdzenie przy ładowaniu strony
+checkAdmin();
+</script>
+</body>
+</html>

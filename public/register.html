@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rejestracja</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="container">
+    <h1>Rejestracja</h1>
+
+    <form id="register-form">
+    <input id="login" placeholder="Login" required />
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Hasło"
+      required
+    />
+    
+    <input
+      id="password2"
+      type="password"
+      placeholder="Powtórz hasło"
+      required
+    />
+      <button>Zarejestruj</button>
+    </form>
+
+    <p>
+      Masz już konto?
+      <a href="/">Zaloguj się</a>
+    </p>
+  </main>
+
+  <script>
+    document
+    .getElementById("register-form")
+    .addEventListener("submit", async e => {
+      e.preventDefault();
+
+      const login = document.getElementById("login").value;
+      const password = document.getElementById("password").value;
+      const password2 = document.getElementById("password2").value;
+
+      if (password !== password2) {
+        alert("Hasła nie są takie same");
+        return;
+      }
+
+      const res = await fetch("/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Konto utworzone. Zaloguj się.");
+        location.href = "/";
+      } else {
+        alert(data.error);
+      }
+    });
+  </script>
+
+</body>
+</html>

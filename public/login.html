@@ -1,0 +1,38 @@
+<head>
+<meta charset="UTF-8" />
+<title>Rejestracja</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<form id="login-form">
+  <input id="login" placeholder="Login" />
+  <input id="password" type="password" placeholder="Hasło" />
+  <button>Zaloguj</button>
+</form>
+<p>
+Nie masz konta?
+<a href="/register.html">Zarejestruj się</a>
+</p>
+<p>
+Nie masz hasła?
+<a href="/forgot-password.html">Nie pamiętam hasła</a>
+</p>
+<script>
+  document.getElementById("login-form").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const login = document.getElementById("login").value;
+    const password = document.getElementById("password").value;
+
+    const res = await fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ login, password }),
+    });
+
+    if (res.ok) {
+      location.href = "/app";
+    } else {
+      alert("Błąd logowania");
+    }
+  });
+</script>
