@@ -294,6 +294,29 @@ db.all("SELECT id, login, role FROM accounts", (err, rows) => {
   });
 });
 
+// Trasa do resetowania hasła przez administratora
+app.post('/admin/reset-password', auth, onlyAdmin, async (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  if (!newPassword || newPassword.length < 3) {
+    return res.status(400).json({ error: "Hasło jest za krótkie" });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    db.run(
+      "UPDATE accounts SET password = ? WHERE id = ?",
+      [hashedPassword, userId],
+      function(err) {
+        if (err) return res.status(500).json({ error: "Błąd bazy danych" });
+        res.json({ success: true });
+      }
+    );
+  } catch (e) {
+    res.status(500).json({ error: "Błąd serwera" });
+  }
+});
+
 /* =========================
    🖥️ PANEL ADMINISTRATORA
 ========================= */
@@ -310,6 +333,8 @@ app.get('/admin-panel', auth, onlyAdmin, (req, res) => {
         <td>${user.login}</td>
         <td>${user.role}</td>
         <td>
+          <input type="password" id="pass-${user.id}" placeholder="Nowe hasło" style="padding: 3px;">
+          <button onclick="resetPassword(${user.id})" style="background: orange; color: black;">Resetuj</button>
           ${user.login !== 'admin' ? `<button onclick="deleteUser(${user.id})">Usuń</button>` : '<i>Główne konto</i>'}
         </td>
       </tr>
@@ -352,6 +377,27 @@ app.get('/admin-panel', auth, onlyAdmin, (req, res) => {
             if (response.ok) {
               document.getElementById('user-' + id).remove();
               alert('Użytkownik został usunięty');
+            } else {
+              const err = await response.json();
+              alert('Błąd: ' + err.error);
+            }
+          }
+
+          async function resetPassword(id) {
+            const newPassword = document.getElementById('pass-' + id).value;
+            if (!newPassword) return alert('Wpisz nowe hasło!');
+            
+            if(!confirm('Czy na pewno zmienić hasło temu użytkownikowi?')) return;
+
+            const response = await fetch('/admin/reset-password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId: id, newPassword: newPassword })
+            });
+
+            if (response.ok) {
+              alert('Hasło zostało zmienione');
+              document.getElementById('pass-' + id).value = ''; // wyczyść pole
             } else {
               const err = await response.json();
               alert('Błąd: ' + err.error);
